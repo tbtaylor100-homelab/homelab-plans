@@ -33,12 +33,14 @@ A new `homelab-infra` repo on Forgejo that version-controls all infrastructure. 
 | `bpg/proxmox` provider | OpenTofu ↔ Proxmox API | Best-maintained community Proxmox provider |
 | Ansible | Configure VMs over SSH | Agentless; installs K3s and hardens OS |
 | K3s | Container orchestration | Lightweight Kubernetes; exposes programmable API for future agent management |
-| Helm | Package manager for K8s | Community charts for ArgoCD, Prometheus, etc. — no raw YAML boilerplate |
-| ArgoCD | GitOps operator in K3s | Watches git repo; continuously reconciles cluster state |
+| Helm | Package manager for K8s | Each app carries its own Helm chart in its own repo — not centralised here |
+| ArgoCD | GitOps operator in K3s | Watches each app's repo; continuously reconciles cluster state |
 | Forgejo Actions | CI pipelines | Built into Forgejo; `tofu plan` on PRs, `tofu apply` on merge |
 | MetalLB | K8s LoadBalancer for bare metal | Assigns local IPs to K8s services (no cloud provider needed) |
 
-**Helm vs Ansible:** Ansible owns the OS layer (install K3s, harden SSH). Helm owns the K8s layer (deploy services inside the cluster using community charts). They don't overlap.
+**Helm lives in app repos, not here.** Each service (Forgejo, Prometheus, etc.) has its own repo containing its own Helm chart. A broken chart change only affects that app — no shared blast radius. `homelab-infra` is not aware of app-level Helm content.
+
+**What ArgoCD does here:** `homelab-infra` contains thin ArgoCD `Application` CRDs — small YAML pointer files that say "watch *this* app repo at *this* path." ArgoCD reads these and then watches each app repo independently. The charts themselves never touch this repo.
 
 **ArgoCD vs Forgejo Actions:** Actions runs one-time pipelines triggered by events. ArgoCD runs permanently inside K3s, watches git, and fixes any drift automatically. Both are needed: Actions for `tofu apply`, ArgoCD for K8s service reconciliation.
 
@@ -71,12 +73,11 @@ homelab-infra/
 │   ├── group_vars/all.yml
 │   ├── roles/base/         # apt, SSH hardening, qemu-guest-agent
 │   ├── roles/k3s/          # k3s install, disable Traefik, kubeconfig fetch
+│   ├── roles/argocd/       # helm install argocd (one-time bootstrap)
 │   └── playbooks/k3s.yml
-└── helm/apps/              # ArgoCD App of Apps
-    ├── Chart.yaml
-    ├── values.yaml
-    ├── argocd-values.yaml
-    └── templates/app-template.yaml
+└── argocd/
+    └── apps/               # ArgoCD Application pointer CRDs (one file per registered app)
+        └── example-app.yaml  # points ArgoCD at an app repo; charts live there, not here
 ```
 
 ## Implementation Order
@@ -100,7 +101,7 @@ Phase 4: Ansible                → MAHHAUS-55
   base + k3s roles; run playbook to configure VM and install K3s
 
 Phase 5: ArgoCD bootstrap       → MAHHAUS-56
-  helm install argocd (once); create App of Apps pointing at homelab-infra/helm/apps/
+  Ansible role installs ArgoCD via Helm (one-time); ArgoCD then watches argocd/apps/ for app registrations
 
 Phase 6: CI + runner            → MAHHAUS-57
   Deploy act_runner on VM 102; wire up Forgejo Actions workflows
