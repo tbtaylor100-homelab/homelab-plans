@@ -1,0 +1,7 @@
+# CODEOWNERS — homelab-plans
+#
+# All plans require review by root before merging.
+# This enforces the human-in-the-loop requirement: agents may open PRs,
+# but only the repository owner can approve and merge them.
+
+* @root
