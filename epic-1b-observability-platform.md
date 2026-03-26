@@ -67,8 +67,7 @@ Each K3s component lives in its own Forgejo repo with its own Helm chart. ArgoCD
 | Grafana admin credentials | Kubernetes Secret (managed in app repo, not committed in plaintext) |
 | Discord webhook | Kubernetes Secret (managed in app repo) |
 | Node Exporter on Proxmox host | Runs as a systemd service directly on the Proxmox host (192.168.1.12) |
-| Node Exporter on VM 102 | Runs as a systemd service on the Docker host (192.168.1.50) |
-| Prometheus scrape for bare-metal exporters | Static scrape configs in kube-prometheus-stack values |
+| Prometheus scrape for bare-metal exporters | Static scrape config in kube-prometheus-stack values |
 
 ## Repo Structure
 
@@ -141,11 +140,11 @@ Phase 4 (MAHHAUS-43d): Alertmanager → Discord + Uptime Kuma alerts
   Configure Uptime Kuma: add Discord notification channel, assign to all checks
   Verify: take down a test service, confirm Discord receives alert within 1 minute
 
-Phase 5 (MAHHAUS-43e): Node Exporter on bare-metal hosts
+Phase 5 (MAHHAUS-43e): Node Exporter on Proxmox host
   Install Node Exporter as systemd service on Proxmox host (192.168.1.12)
-  Install Node Exporter as systemd service on VM 102 (192.168.1.50)
-  Update kube-prometheus-stack values.yaml scrape targets to include both
-  Verify host metrics visible in Grafana
+  Update kube-prometheus-stack values.yaml scrape target to include it
+  Verify Proxmox host metrics visible in Grafana
+  (VM 102 excluded — being decommissioned, not worth instrumenting)
 ```
 
 ## Bootstrapping Notes
