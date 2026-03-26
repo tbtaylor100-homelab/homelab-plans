@@ -126,12 +126,17 @@ Phase 2 (MAHHAUS-43b): kube-prometheus-stack via ArgoCD
   Add argocd/apps/kube-prometheus-stack.yaml to homelab-infra (PR → merge → ArgoCD deploys)
   Verify Grafana accessible at http://192.168.1.201, K3s node dashboard loads
 
-Phase 3 (MAHHAUS-43c): Loki + Promtail via ArgoCD
+Phase 3 (MAHHAUS-43c): Loki + Promtail via ArgoCD + promtail base role
   Create homelab-loki-stack repo on Forgejo
-  Write Chart.yaml + values.yaml (Promtail tails /var/log/pods on k3s-control-01)
+  Write Chart.yaml + values.yaml (Promtail DaemonSet tails /var/log/pods on k3s-control-01)
   Add argocd/apps/loki-stack.yaml to homelab-infra (PR → merge → ArgoCD deploys)
   Add Loki datasource to Grafana values.yaml in homelab-kube-prometheus-stack
-  Verify pod logs searchable in Grafana Explore
+  Add roles/promtail Ansible role to homelab-infra:
+    - Installs Promtail as a systemd service on any VM
+    - Ships systemd journal + syslog to Loki
+    - Included in every VM playbook alongside base role (systematic, not ad-hoc)
+  Apply retroactively to k3s-control-01 and uptime-kuma-01
+  Verify K3s pod logs and VM systemd logs both searchable in Grafana Explore
 
 Phase 4 (MAHHAUS-43d): Alertmanager → Discord + Uptime Kuma alerts
   Create Discord webhook; store as Kubernetes Secret
