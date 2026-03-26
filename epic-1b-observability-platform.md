@@ -27,7 +27,7 @@ Five deployment units, delivered in phases:
 2. **kube-prometheus-stack** in K3s — Prometheus, Grafana, and Alertmanager as a single Helm chart, deployed via ArgoCD
 3. **Loki + Promtail** in K3s — log aggregation for all K3s pods, wired into Grafana as a second datasource, deployed via ArgoCD
 4. **Alertmanager → Discord** — critical event notifications (K3s node down, service unreachable)
-5. **Node Exporter on Proxmox host and VM 102** — host-level metrics while VM 102 still exists
+5. **Node Exporter on Proxmox host** — host-level metrics for the hypervisor
 
 Each K3s component lives in its own Forgejo repo with its own Helm chart. ArgoCD watches each repo via a pointer CRD in `homelab-infra/argocd/apps/`. This is the first real end-to-end test of the GitOps pipeline established in Epic 1.
 
