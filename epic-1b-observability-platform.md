@@ -58,7 +58,7 @@ Each K3s component lives in its own Forgejo repo with its own Helm chart. ArgoCD
 |----------|--------|
 | Uptime Kuma VM ID / hostname | 111 / `uptime-kuma-01` |
 | Uptime Kuma VM IP | 192.168.1.61 (static, reserved in router) |
-| Uptime Kuma VM spec | 1 vCPU / 1 GB RAM / 20 GB disk (Ubuntu 24.04 cloud-init) |
+| Uptime Kuma VM spec | 1 vCPU / 2 GB RAM / 20 GB disk (Ubuntu 24.04 cloud-init) |
 | Uptime Kuma VM storage | `Intel660P` LVM (same pool as k3s-control-01) |
 | Uptime Kuma deployment | Docker Compose via Ansible role (not K3s) |
 | Grafana LoadBalancer IP | 192.168.1.201 (MetalLB, reserved) |
